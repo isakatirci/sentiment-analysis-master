@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.CoreMap;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.ejml.simple.SimpleMatrix;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +81,7 @@ public class SentimentAnalyzerService {
         return;
     }
 
-    public static void main(String[] args) {
+    public static void main1(String[] args) {
         try {
             String path = new ClassPathResource("vicinitas_search_results_rihanna.xlsx").getFile().getAbsolutePath();
             FileInputStream file = new FileInputStream(new File(path));
@@ -207,4 +208,60 @@ public class SentimentAnalyzerService {
         cell.setCellValue(entry.getValue().get(1));
         cell.setCellStyle(style);
     }
+
+
+    public static void main(String[] args) {
+        SentimentResult sentimentResult = getSentimentResult("Many of the people Trump has chosen to pardon so far fall along predictable lines: associates such as Roger Stone and Michael Flynn who remained loyal to him through their legal troubles; criminals with friendly or familial ties to the administration, such as Jared Kushner's father Charles; celebrities or people connected to celebrities, such as Rod Blagojevich; and those whose cause was taken up by conservative media, such as Blackwater security guards who massacred Iraqi civilians.");
+        System.out.println("Sentiment Score: " + sentimentResult.getSentimentScore());
+        System.out.println("Sentiment Type: " + sentimentResult.getSentimentType());
+        System.out.println("Very positive: " + sentimentResult.getSentimentClass().getVeryPositive()+"%");
+        System.out.println("Positive: " + sentimentResult.getSentimentClass().getPositive()+"%");
+        System.out.println("Neutral: " + sentimentResult.getSentimentClass().getNeutral()+"%");
+        System.out.println("Negative: " + sentimentResult.getSentimentClass().getNegative()+"%");
+        System.out.println("Very negative: " + sentimentResult.getSentimentClass().getVeryNegative()+"%");
+    }
+
+    public static SentimentResult getSentimentResult(String text) {
+
+        Properties props;
+        StanfordCoreNLP pipeline;
+
+        // creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and sentiment
+        props = new Properties();
+        props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
+        pipeline = new StanfordCoreNLP(props);
+
+
+        SentimentResult sentimentResult = new SentimentResult();
+        SentimentClassification sentimentClass = new SentimentClassification();
+
+        if (text != null && text.length() > 0) {
+
+            // run all Annotators on the text
+            Annotation annotation = pipeline.process(text);
+
+            for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+                // this is the parse tree of the current sentence
+                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                SimpleMatrix sm = RNNCoreAnnotations.getPredictions(tree);
+                String sentimentType = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
+
+                sentimentClass.setVeryPositive((double) Math.round(sm.get(4) * 100d));
+                sentimentClass.setPositive((double) Math.round(sm.get(3) * 100d));
+                sentimentClass.setNeutral((double) Math.round(sm.get(2) * 100d));
+                sentimentClass.setNegative((double) Math.round(sm.get(1) * 100d));
+                sentimentClass.setVeryNegative((double) Math.round(sm.get(0) * 100d));
+
+                sentimentResult.setSentimentScore(RNNCoreAnnotations.getPredictedClass(tree));
+                sentimentResult.setSentimentType(sentimentType);
+                sentimentResult.setSentimentClass(sentimentClass);
+            }
+
+        }
+
+
+        return sentimentResult;
+    }
+
+
 }
