@@ -35,3 +35,4 @@ build/
 /backend/.mvn/wrapper
 /backend/mvnw
 /backend/mvnw.cmd
+/backend/src/main/resources/~$test_rihanna.xlsx

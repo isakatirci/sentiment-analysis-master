@@ -7,18 +7,13 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import me.aboullaite.corenlp.sentimentanalysis.model.SentimentType;
-import me.aboullaite.corenlp.sentimentanalysis.model.TwitterStatus;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import twitter4j.Status;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 @Service
@@ -87,7 +82,7 @@ public class SentimentAnalyzerService {
 
     public static void main(String[] args) {
         try {
-            String path = new ClassPathResource("vicinitas_search_results.xlsx").getFile().getAbsolutePath();
+            String path = new ClassPathResource("vicinitas_search_results_rihanna.xlsx").getFile().getAbsolutePath();
             FileInputStream file = new FileInputStream(new File(path));
             Workbook workbook = new XSSFWorkbook(file);
             Sheet sheet = workbook.getSheetAt(0);
@@ -157,7 +152,7 @@ public class SentimentAnalyzerService {
 
     private static void writeData(Map<Integer, List<String>> data) {
         try {
-            String path = new ClassPathResource("test1.xlsx").getFile().getAbsolutePath();
+            String path = new ClassPathResource("test_rihanna.xlsx").getFile().getAbsolutePath();
             Workbook workbook = new XSSFWorkbook();
 
             Sheet sheet = workbook.createSheet("NLP");
